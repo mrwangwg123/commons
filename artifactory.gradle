@@ -1,0 +1,89 @@
+apply plugin: 'com.jfrog.artifactory'
+
+apply plugin: 'maven-publish'
+
+def packageName = 'com.wave.android.commons'//需要替换成自己的
+
+def getArtifactFullPath(){
+
+    return "$buildDir/outputs/aar/${project.getName()}-release.aar"
+
+}
+
+publishing {
+
+    publications {
+
+        aar(MavenPublication) {
+
+//            if (!project.hasProperty('android')) {
+//
+//                return
+//
+//            }
+
+//            def libVersion = "${project.android.defaultConfig.versionName}"//这里也可以像packageName一样在上面配置变量,现在的写法是从project的gradle里面读取版本
+            def libVersion = "1.0.0"
+
+            groupId packageName
+
+            version = libVersion
+
+            //artifactId project.getName()//这里也可以像packageName一样在上面配置变量,现在的写法是从project的gradle里面读取名字
+            artifactId 'com.wave.android.commons'
+
+            // Tell maven to prepare the generated "*.aar" file for publishing
+
+            artifact getArtifactFullPath()
+
+        }
+
+    }
+
+}
+
+artifactory {
+
+    contextUrl = "${artifactory_contextUrl}"
+
+    publish {
+
+        repository {
+
+            // The Artifactory repository key to publish to            repoKey = "${artifactory_repoKey}"
+
+            username = "${artifactory_user}" // The publisher user name
+
+            password = "${artifactory_password}" // The publisher password
+
+            maven = true
+
+        }        defaults {
+
+            publishArtifacts = true
+
+            publications('aar')
+
+            publishPom = true //Publish generated POM files to Artifactory (true by default)
+
+            publishIvy = false //Publish generated Ivy descriptor files to Artifactory (true by default)
+
+        }
+
+    }
+
+    resolve {
+
+        repository {
+
+            repoKey = 'jcenter'
+
+            username = "${artifactory_user}" // The resolver user name
+
+            password = "${artifactory_password}" // The resolver password
+
+        }
+
+    }
+
+}
